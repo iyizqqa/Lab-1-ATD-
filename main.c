@@ -1,157 +1,420 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "matrix.h"
 #include "types.h"
-#include "tests.h"
 
-int main() {
-	run_all_tests();
+static int input_command(int *command)
+{
+	char next_char;
+	int result;
+	int done = 0;
 
-	Matrix* A = NULL;
-	Matrix* B = NULL;
-	Matrix* Res = NULL;
-	int command;
-	int off_prog = 0;
-
-	printf("\n===Polymorphic Square Matrix (Lab option 21)===\n");
-    	printf("1.Create matrix A\n");
-    	printf("2.Create matrix B\n");
-   	printf("3.Add matrices (A + B)\n");
-    	printf("4.Multiply matrices (A * B)\n");
-    	printf("5.Multiply A by scalar\n");
-    	printf("6.Show matrix\n");
-    	printf("0.Exit\n");
-
-    	printf("Enter command: ");
-    	scanf("%d", &command);
-
-	while (off_prog != 1) {
-		switch (command) {
-			case 1:
-			case 2: {
-				size_t n;
-				int type_number;
-				printf("Enter type (1=int, 2=complex): ");
-				scanf("%d", &type_number);
-				printf("Enter size N of matrix(NxN): ");
-				scanf("%zu", &n);	
-				
-				const FieldInfo* info = (type_number == 1) ? get_int_info() : get_complex_info();
-				Matrix** target = (command == 1) ? &A : &B;
-
-				destroy_matrix(target);
-				*target = create_matrix(n, info);
-
-				if (*target) {
-					input_matrix(*target);
-					printf("Matrix %c created successfully\n", (command == 1) ? 'A' : 'B');
-				} else {
-					printf("Error: couldn't create the matrix\n");
-				}
-				
-				break;
-			}
-
-			case 3:
-				destroy_matrix(&Res);
-				Res = add_matrices(A, B);
-				if (Res) {
-					printf("Addition completed successfully\n");
-				} else {
-					printf("Error: couldn't add\n");
-				}
-				
-				break;
-
-			case 4:
-				destroy_matrix(&Res);
-				Res = multiply_matrices(A, B);
-				if (Res) {
-					printf("Multiplication completed successfully\n");
-				} else {
-					printf("Error: couldn't multiply\n");
-				}
-
-				break;
-
-			case 5: {
-				if (!A || !B) {
-					printf("Error: create matrix first\n");
-					break;
-				}
-
-				printf("Enter scalar type (1=int, 2=complex): ");
-				int scalar_type;
-				scanf("%d", &scalar_type);
-
-				int matrix_type = (A->info == get_int_info()) ? 1 : 2;
-				if (scalar_type != matrix_type) {
-					printf("Error: scalar type match matrix type\n");
-					break;
-				}
-				
-				//можно малоком но тогда освобождать надо както не хочу в куче хранить буду в стеке
-				void* scalar = NULL;
-				int int_scalar;
-				Complex complex_scalar;
-
-				if (scalar_type == 1) {
-					printf("Enter scalar value (int) : ");
-					scanf("%d", &int_scalar);
-					scalar = &int_scalar;  // адрес стековой переменной
-				} else {
-					printf("Enter scalar value (complex re im): ");
-					scanf("%lf %lf", &complex_scalar.re, &complex_scalar.im);
-					scalar = &complex_scalar;
-				}
-
-				destroy_matrix(&Res);
-				Res = scalar_multiply_matrix(A, scalar);
-
-				if (Res) {
-					printf("Scalar multiplication completed successfully\n");
-				} else {
-					printf("Error: couldn't multiply\n");
-				}
-				break;
-			}
-
-			case 6: {
-				size_t show_which;
-				printf("Which matrix to show (1=A, 2=B, 3=Result): ");
-				scanf("%zu", &show_which);
-				const Matrix* matrix_to_show = (show_which == 1) ? A : (show_which == 2) ? B : Res;
-				if (matrix_to_show) {
-					output_matrix(matrix_to_show);
-				} else {
-					printf("Error\n");
-				}
-				break;
-			}
-
-
-			case 0:
-				off_prog = 1;
-				break;
-
-			default:
-				printf("Error: invalid command\n");
-				break;
+	do
+	{
+		printf("Input command: ");
+		result = scanf("%d%c", command, &next_char);
+		if (result == EOF)
+		{
+			printf("error\n");
+			done = 1;
 		}
-		
-		if (off_prog == 0) {
-			printf("Enter command: ");
-			scanf("%d", &command);
+		else if (result == 2)
+		{
+			if (next_char != '\n')
+			{
+				printf("Incorrect Input\n");
+				scanf("%*[^\n]");
+			}
+			else
+			{
+				if ((*command >= 0) && (*command <= 6))
+				{
+					done = 1;
+				}
+				else
+				{
+					printf("Choose command 0-6\n");
+				}
+			}
 		}
-	}
+		else
+		{
+			printf("Incorrect input\n");
+			scanf("%*[^\n]");
+		}
+	} while (!done);
 
-	destroy_matrix(&A);
-	destroy_matrix(&B);
-	destroy_matrix(&Res);
-
-	return 0;
-
+	return result;
 }
 
-	
+static int input_type_number(int *type_number)
+{
+	char next_char;
+	int result;
+	int done = 0;
+
+	do
+	{
+		printf("Enter type (1=int, 2=complex): ");
+		result = scanf("%d%c", type_number, &next_char);
+
+		if (result == EOF)
+		{
+			printf("Input finished\n");
+			done = 1;
+		}
+		else if (result == 2)
+		{
+			if (next_char != '\n')
+			{
+				printf("Incorrect input\n");
+				scanf("%*[^\n]");
+				scanf("%*c");
+			}
+			else
+			{
+				if (*type_number == 1 || *type_number == 2)
+				{
+					done = 1;
+				}
+				else
+				{
+					printf("Choose type 1 or 2\n");
+				}
+			}
+		}
+		else
+		{
+			printf("Incorrect input\n");
+			scanf("%*[^\n]");
+			scanf("%*c");
+		}
+	} while (!done);
+
+	return result;
+}
+
+static int input_size_value(size_t *n)
+{
+	char next_char;
+	int result;
+	int done = 0;
+
+	do
+	{
+		printf("Enter size N of matrix (NxN): ");
+		result = scanf("%zu%c", n, &next_char);
+
+		if (result == EOF)
+		{
+			printf("Input finished\n");
+			done = 1;
+		}
+		else if (result == 2)
+		{
+			if (next_char != '\n')
+			{
+				printf("Incorrect input\n");
+				scanf("%*[^\n]");
+				scanf("%*c");
+			}
+			else if (*n == 0)
+			{
+				printf("Size must be > 0\n");
+			}
+			else
+			{
+				done = 1;
+			}
+		}
+		else
+		{
+			printf("Incorrect input\n");
+			scanf("%*[^\n]");
+			scanf("%*c");
+		}
+	} while (!done);
+
+	return result;
+}
+
+static int input_int_value(int *value)
+{
+	char next_char;
+	int result;
+	int done = 0;
+
+	do
+	{
+		printf("Enter int scalar: ");
+		result = scanf("%d%c", value, &next_char);
+
+		if (result == EOF)
+		{
+			printf("Input finished\n");
+			done = 1;
+		}
+		else if (result == 2)
+		{
+			if (next_char != '\n')
+			{
+				printf("Incorrect input\n");
+				scanf("%*[^\n]");
+				scanf("%*c");
+			}
+			else
+			{
+				done = 1;
+			}
+		}
+		else
+		{
+			printf("Incorrect input\n");
+			scanf("%*[^\n]");
+			scanf("%*c");
+		}
+	} while (!done);
+
+	return result;
+}
+
+static int input_double_value(const char *prompt, double *value)
+{
+	char next_char;
+	int result;
+	int done = 0;
+
+	do
+	{
+		printf("%s", prompt);
+		result = scanf("%lf%c", value, &next_char);
+
+		if (result == EOF)
+		{
+			printf("Input finished\n");
+			done = 1;
+		}
+		else if (result == 2)
+		{
+			if (next_char != '\n')
+			{
+				printf("Incorrect input\n");
+				scanf("%*[^\n]");
+				scanf("%*c");
+			}
+			else
+			{
+				done = 1;
+			}
+		}
+		else
+		{
+			printf("Incorrect input\n");
+			scanf("%*[^\n]");
+			scanf("%*c");
+		}
+	} while (!done);
+
+	return result;
+}
+
+int main()
+{
+
+	Matrix A = {0, NULL, NULL};
+	Matrix B = {0, NULL, NULL};
+	Matrix Res = {0, NULL, NULL};
+
+	int command;
+	int type_number;
+	size_t n;
+	const FieldInfo *info;
+
+	do
+	{
+		printf("\n===Polymorphic Square Matrix (Lab option 21)===\n");
+		printf("1.Create matrix A\n");
+		printf("2.Create matrix B\n");
+		printf("3.Add matrices (A + B)\n");
+		printf("4.Multiply matrices (A * B)\n");
+		printf("5.Multiply A by scalar\n");
+		printf("6.Show matrix\n");
+		printf("0.Exit\n");
+
+		if (input_command(&command) == EOF)
+		{
+			break;
+		}
+		switch (command)
+		{
+		case 1:
+		case 2:
+			if (input_type_number(&type_number) == EOF)
+			{
+				command = 0;
+				break;
+			}
+
+			if (input_size_value(&n) == EOF)
+			{
+				command = 0;
+				break;
+			}
+
+			if (type_number == 1)
+			{
+				info = get_int_info();
+			}
+			else
+			{
+				info = get_complex_info();
+			}
+
+			if (command == 1)
+			{
+				clear_matrix(&A);
+
+				if (!init_matrix(&A, n, info))
+				{
+					printf("Error creating matrix A\n");
+					break;
+				}
+
+				printf("Enter matrix A:\n");
+				input_matrix(&A);
+			}
+			else
+			{
+				clear_matrix(&B);
+
+				if (!init_matrix(&B, n, info))
+				{
+					printf("Error creating matrix B\n");
+					break;
+				}
+
+				printf("Enter matrix B:\n");
+				input_matrix(&B);
+			}
+			break;
+
+		case 3:
+			if (!A.data || !B.data)
+			{
+				printf("Create matrices A and B first\n");
+				break;
+			}
+
+			clear_matrix(&Res);
+			Res = add_matrices(&A, &B);
+
+			if (!Res.data)
+			{
+				printf("Addition error\n");
+			}
+			else
+			{
+				printf("Result of A + B:\n");
+				output_matrix(&Res);
+			}
+			break;
+
+		case 4:
+			if (!A.data || !B.data)
+			{
+				printf("Create matrices A and B first\n");
+				break;
+			}
+
+			clear_matrix(&Res);
+			Res = multiply_matrices(&A, &B);
+
+			if (!Res.data)
+			{
+				printf("Multiplication error\n");
+			}
+			else
+			{
+				printf("Result of A * B:\n");
+				output_matrix(&Res);
+			}
+			break;
+
+		case 5:
+			if (!A.data)
+			{
+				printf("Create matrix A first\n");
+				break;
+			}
+
+			clear_matrix(&Res);
+
+			if (A.info == get_int_info())
+			{
+				int scalar;
+
+				if (input_int_value(&scalar) == EOF)
+				{
+					command = 0;
+					break;
+				}
+
+				Res = scalar_multiply_matrix(&A, &scalar);
+			}
+			else if (A.info == get_complex_info())
+			{
+				Complex scalar;
+
+				if (input_double_value("Real part: ", &scalar.re) == EOF)
+				{
+					command = 0;
+					break;
+				}
+
+				if (input_double_value("Imaginary part: ", &scalar.im) == EOF)
+				{
+					command = 0;
+					break;
+				}
+
+				Res = scalar_multiply_matrix(&A, &scalar);
+			}
+
+			if (Res.data == NULL)
+			{
+				printf("Scalar multiplication error\n");
+			}
+			else
+			{
+				printf("Result of scalar multiplication:\n");
+				output_matrix(&Res);
+			}
+			break;
+
+		case 6:
+			printf("Matrix A:\n");
+			output_matrix(&A);
+
+			printf("Matrix B:\n");
+			output_matrix(&B);
+
+			printf("Result matrix:\n");
+			output_matrix(&Res);
+			break;
+
+		case 0:
+			break;
+
+		default:
+			printf("Wrong command\n");
+			break;
+		}
+
+	} while (command != 0);
+
+	clear_matrix(&A);
+	clear_matrix(&B);
+	clear_matrix(&Res);
+
+	return 0;
+}

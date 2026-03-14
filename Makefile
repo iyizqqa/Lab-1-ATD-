@@ -1,5 +1,5 @@
-lab1: main.c types.c matrix.c tests.c
-	gcc -o lab1 main.c types.c matrix.c tests.c -lm
+lab1: main.c types.c matrix.c 
+	gcc -o lab1 main.c types.c matrix.c 
 
 clean:
 	rm -f lab1
