@@ -41,7 +41,8 @@ const FieldInfo *get_int_info(void)
 		int_scalar_multiply,
 		int_set_zero,
 		int_print,
-		int_read};
+		int_read,
+	};
 
 	return &info;
 }

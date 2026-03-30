@@ -19,7 +19,7 @@ int init_matrix(Matrix *m, size_t n, const FieldInfo *info)
 
 	size_of_matrix = n * n;
 
-	m->data = malloc(size_of_matrix * info->elem_size);
+	m->data = calloc(size_of_matrix, info->elem_size);
 	if (!m->data)
 	{
 		return 0;
