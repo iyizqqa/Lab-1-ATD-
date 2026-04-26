@@ -145,6 +145,7 @@ Matrix multiply_matrices(const Matrix *a, const Matrix *b)
 		clear_matrix(&res);
 		return (Matrix){0, NULL, NULL};
 	}
+	a->info->set_zero(tmp);
 
 	// C[i][j] = sum(A[i][k] * B[k][j])
 	for (size_t i = 0; i < a->size; i++)
@@ -190,7 +191,7 @@ Matrix scalar_multiply_matrix(const Matrix *a, const void *scalar)
 			const void *a_elem = get_element_const(a, i, j);
 			void *res_elem = get_element(&res, i, j);
 
-			res.info->scalar_multiply(a_elem, scalar, res_elem);
+			res.info->multiply(a_elem, scalar, res_elem);
 		}
 	}
 

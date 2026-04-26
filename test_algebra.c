@@ -130,11 +130,6 @@ static void test_expr_multiply(const void *a, const void *b, void *res)
 	result->text = text;
 }
 
-static void test_expr_scalar_multiply(const void *a, const void *b, void *res)
-{
-	test_expr_multiply(a, b, res);
-}
-
 static void test_expr_set_zero(void *a)
 {
 	TestExpr *expr = (TestExpr *)a;
@@ -177,7 +172,6 @@ const FieldInfo *get_test_expr_info(void)
 		"test_expr",
 		test_expr_add,
 		test_expr_multiply,
-		test_expr_scalar_multiply,
 		test_expr_set_zero,
 		test_expr_print,
 		test_expr_read

@@ -11,11 +11,6 @@ void int_multiply(const void *a, const void *b, void *res)
 	*(int *)res = *(const int *)a * *(const int *)b;
 }
 
-void int_scalar_multiply(const void *a, const void *s, void *res)
-{
-	*(int *)res = *(const int *)a * *(const int *)s;
-}
-
 void int_set_zero(void *a)
 {
 	*(int *)a = 0;
@@ -38,7 +33,6 @@ const FieldInfo *get_int_info(void)
 		"int",
 		int_add,
 		int_multiply,
-		int_scalar_multiply,
 		int_set_zero,
 		int_print,
 		int_read,
@@ -66,16 +60,6 @@ void complex_multiply(const void *a, const void *b, void *res)
 	// (a + bi)(c + di) = ac + adi + bci - bd = (ac - bd) + (ad + bc)i
 	r->re = va->re * vb->re - va->im * vb->im;
 	r->im = va->re * vb->im + va->im * vb->re;
-}
-
-void complex_scalar_multiply(const void *a, const void *s, void *res)
-{
-	Complex *r = (Complex *)res;
-	const Complex *va = (const Complex *)a;
-	const Complex *vs = (const Complex *)s;
-
-	r->re = va->re * vs->re - va->im * vs->im;
-	r->im = va->re * vs->im + va->im * vs->re;
 }
 
 void complex_set_zero(void *a)
@@ -114,7 +98,6 @@ const FieldInfo *get_complex_info()
 		"complex",
 		complex_add,
 		complex_multiply,
-		complex_scalar_multiply,
 		complex_set_zero,
 		complex_print,
 		complex_read,
